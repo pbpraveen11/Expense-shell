@@ -5,6 +5,9 @@ TIMESTAMP=$(date +%F-%H-%M-%S)
 SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
 LOGFILE=/tmp/$SCRIPT_NAME-$TIMESTAMP.log
 
+echo "Please enter the DB password:"
+read -s mysql_root_password
+
 R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
@@ -37,7 +40,7 @@ VALIDATE $? "Enabling mySql Server"
 systemctl start mysqld &>>$LOGFILE
 VALIDATE $? "Starting MySql Server"
 
-mysql_secure_installation --set-root-pass ExpenseApp@1 &>>$LOGFILE
+mysql_secure_installation --set-root-pass ${mysql_root_password} &>>$LOGFILE
 VALIDATE $? "Setting up root password"
 
 # #Below code will be useful for Idempotent nature
