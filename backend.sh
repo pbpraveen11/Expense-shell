@@ -33,36 +33,47 @@ else
     echo "You are a super user"    
 fi
 
-dnf module disable nodejs -y
+dnf module disable nodejs -y &>>$LOGFILE
+VALIDATE $? "Disabling nodejs"
 
-dnf module enable nodejs:20 -y
+dnf module enable nodejs:20 -y &>>$LOGFILE
+VALIDATE $? "Enabling jodejs:20"
 
-dnf install nodejs -y
+dnf install nodejs -y &>>$LOGFILE
+VALIDATE $? "Installing nodejs"
 
-useradd expense
+id expense &>>$LOGFILE
+if [ $? -ne 0 ]
+then
+    useradd expense
+    VALIDATE $? "Creating Expense user"
+else
+    echo -e "Expense user Already created...$Y SKIPPING $N"
+fi
 
-mkdir /app
 
-curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+# mkdir /app
 
-cd /app
+# curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
 
-unzip /tmp/backend.zip
+# cd /app
 
-cd /app
+# unzip /tmp/backend.zip
 
-npm install
+# cd /app
 
-vim /etc/systemd/system/backend.service
+# npm install
 
-systemctl daemon-reload
+# vim /etc/systemd/system/backend.service
 
-systemctl start backend
+# systemctl daemon-reload
 
-systemctl enable backend
+# systemctl start backend
 
-dnf install mysql -y
+# systemctl enable backend
 
-mysql -h sqlIp -uroot -pExpenseApp@1 < /app/schema/backend.sql
+# dnf install mysql -y
 
-systemctl restart backend
+# mysql -h sqlIp -uroot -pExpenseApp@1 < /app/schema/backend.sql
+
+# systemctl restart backend
