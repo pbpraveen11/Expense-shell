@@ -8,8 +8,8 @@ LOGFILE=/tmp/$SCRIPT_NAME-$TIMESTAMP.log
 echo "Enter DB password"
 read mysql_password
 
-echo "Enter MySQL IP"
-read MySqlIP
+# echo "Enter MySQL IP"
+# read MySqlIP
 
 
 R="\e[31m"
@@ -87,7 +87,7 @@ VALIDATE $? "Enabling Backend Services"
 dnf install mysql -y &>>$LOGFILE
 VALIDATE $? "Installing mysql client"
 
-mysql -h MySqlIP -uroot -p${mysql_password} < /app/schema/backend.sql &>>$LOGFILE
+mysql -h 172.31.83.126 -uroot -p${mysql_password} < /app/schema/backend.sql &>>$LOGFILE
 VALIDATE $? "Schema loading"
 
 systemctl restart backend &>>$LOGFILE
