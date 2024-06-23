@@ -5,6 +5,10 @@ TIMESTAMP=$(date +%F-%H-%M-%S)
 SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
 LOGFILE=/tmp/$SCRIPT_NAME-$TIMESTAMP.log
 
+echo "Enter MySQL IP"
+read sqlIp
+
+
 R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
@@ -59,6 +63,6 @@ systemctl enable backend
 
 dnf install mysql -y
 
-mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -pExpenseApp@1 < /app/schema/backend.sql
+mysql -h sqlIp -uroot -pExpenseApp@1 < /app/schema/backend.sql
 
 systemctl restart backend
