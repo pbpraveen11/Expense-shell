@@ -5,8 +5,8 @@ TIMESTAMP=$(date +%F-%H-%M-%S)
 SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
 LOGFILE=/tmp/$SCRIPT_NAME-$TIMESTAMP.log
 
-echo "Enter MySQL IP"
-read sqlIp
+echo "Enter DB password"
+read mysql_password
 
 
 R="\e[31m"
@@ -51,29 +51,41 @@ else
     echo -e "Expense user Already created...$Y SKIPPING $N"
 fi
 
+mkdir -p /app &>>$LOGFILE # here by giving -p will create directory if no directory exist else just exit
+VALIDATE $? "Creating app directory"
 
-# mkdir /app
+curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip &>>$LOGFILE
+VALIDATE $? "Downloading backend code"
 
-# curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+cd /app
+
+unzip /tmp/backend.zip &>>$LOGFILE
+VALIDATE $? "Extracting backend code"
+
 
 # cd /app
 
-# unzip /tmp/backend.zip
+npm install &>>$LOGFILE
+VALIDATE $? "Installing nodejs dependencies"
 
-# cd /app
 
-# npm install
+cp /home/ec2-user/Expense-shell/backend.service /etc/systemd/system/backend.service &>>$LOGFILE
+VALIDATE $? "Copied backend service"
 
-# vim /etc/systemd/system/backend.service
+systemctl daemon-reload &>>$LOGFILE
+VALIDATE $? "daemon reload"
 
-# systemctl daemon-reload
+systemctl start backend &>>$LOGFILE
+VALIDATE $? "Starting Backend services"
 
-# systemctl start backend
+systemctl enable backend &>>$LOGFILE
+VALIDATE $? "Enabling Backend Services"
 
-# systemctl enable backend
+dnf install mysql -y &>>$LOGFILE
+VALIDATE $? "Installing mysql client"
 
-# dnf install mysql -y
+mysql -h 18.212.163.131 -uroot -p${mysql_password} < /app/schema/backend.sql &>>$LOGFILE
+VALIDATE $? "Schema loading"
 
-# mysql -h sqlIp -uroot -pExpenseApp@1 < /app/schema/backend.sql
-
-# systemctl restart backend
+systemctl restart backend &>>$LOGFILE
+VALIDATE $? "Restarting Backend services"
